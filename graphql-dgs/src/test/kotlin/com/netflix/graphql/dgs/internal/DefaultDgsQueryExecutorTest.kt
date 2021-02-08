@@ -26,6 +26,7 @@ import com.netflix.graphql.dgs.exceptions.QueryException
 import graphql.execution.AsyncExecutionStrategy
 import graphql.execution.AsyncSerialExecutionStrategy
 import graphql.execution.instrumentation.ChainedInstrumentation
+import graphql.execution.preparsed.NoOpPreparsedDocumentProvider
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
@@ -114,7 +115,7 @@ internal class DefaultDgsQueryExecutorTest {
         """.trimIndent())
 
 
-        dgsQueryExecutor = DefaultDgsQueryExecutor(schema, provider, dgsDataLoaderProvider, DefaultDgsGraphQLContextBuilder(Optional.empty()), ChainedInstrumentation(), AsyncExecutionStrategy(), AsyncSerialExecutionStrategy())
+        dgsQueryExecutor = DefaultDgsQueryExecutor(schema, provider, dgsDataLoaderProvider, DefaultDgsGraphQLContextBuilder(Optional.empty()), ChainedInstrumentation(), AsyncExecutionStrategy(), AsyncSerialExecutionStrategy(), NoOpPreparsedDocumentProvider.INSTANCE)
     }
 
     @Test

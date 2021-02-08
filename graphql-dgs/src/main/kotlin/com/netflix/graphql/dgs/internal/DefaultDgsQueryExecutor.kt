@@ -32,6 +32,8 @@ import graphql.execution.ExecutionStrategy
 import graphql.execution.NonNullableFieldWasNullError
 import graphql.execution.SubscriptionExecutionStrategy
 import graphql.execution.instrumentation.ChainedInstrumentation
+import graphql.execution.preparsed.NoOpPreparsedDocumentProvider
+import graphql.execution.preparsed.PreparsedDocumentProvider
 import graphql.schema.GraphQLSchema
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -48,6 +50,7 @@ class DefaultDgsQueryExecutor(defaultSchema: GraphQLSchema,
                               private val chainedInstrumentation: ChainedInstrumentation,
                               private val queryExecutionStrategy: ExecutionStrategy,
                               private val mutationExecutionStrategy: ExecutionStrategy,
+                              private val preparsedDocumentProvider: PreparsedDocumentProvider,
                               private val reloadIndicator: ReloadSchemaIndicator = ReloadSchemaIndicator{ false }
 ) : DgsQueryExecutor {
 
@@ -81,12 +84,19 @@ class DefaultDgsQueryExecutor(defaultSchema: GraphQLSchema,
                 else
                     schema.get()
 
+        val preparsedDocumentProvider: PreparsedDocumentProvider =
+                if(reloadIndicator.reloadSchema())
+                    NoOpPreparsedDocumentProvider.INSTANCE
+                else
+                    preparsedDocumentProvider
+
         val graphQL =
                 GraphQL.newGraphQL(graphQLSchema)
                         .instrumentation(chainedInstrumentation)
                         .queryExecutionStrategy(queryExecutionStrategy)
                         .mutationExecutionStrategy(mutationExecutionStrategy)
                         .subscriptionExecutionStrategy(SubscriptionExecutionStrategy())
+                        .preparsedDocumentProvider(preparsedDocumentProvider)
                         .build()
 
         val dgsContext = contextBuilder.build()

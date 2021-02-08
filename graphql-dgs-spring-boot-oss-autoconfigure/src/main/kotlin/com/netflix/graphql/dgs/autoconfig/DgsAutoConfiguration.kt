@@ -34,6 +34,8 @@ import graphql.execution.DataFetcherExceptionHandler
 import graphql.execution.ExecutionStrategy
 import graphql.execution.instrumentation.ChainedInstrumentation
 import graphql.execution.instrumentation.Instrumentation
+import graphql.execution.preparsed.NoOpPreparsedDocumentProvider
+import graphql.execution.preparsed.PreparsedDocumentProvider
 import graphql.schema.GraphQLCodeRegistry
 import graphql.schema.GraphQLSchema
 import graphql.schema.idl.TypeDefinitionRegistry
@@ -66,6 +68,7 @@ open class DgsAutoConfiguration {
                               environment: Environment,
                               @Qualifier("query") providedQueryExecutionStrategy: Optional<ExecutionStrategy>,
                               @Qualifier("mutation") providedMutationExecutionStrategy: Optional<ExecutionStrategy>,
+                              preparsedDocumentProvider: PreparsedDocumentProvider,
                               reloadSchemaIndicator: ReloadSchemaIndicator
     ): DgsQueryExecutor {
 
@@ -80,6 +83,7 @@ open class DgsAutoConfiguration {
                 chainedInstrumentation,
                 queryExecutionStrategy,
                 mutationExecutionStrategy,
+                preparsedDocumentProvider,
                 reloadSchemaIndicator
         )
     }
@@ -160,5 +164,11 @@ open class DgsAutoConfiguration {
     @Bean
     open fun uploadScalar(): UploadScalar {
         return UploadScalar()
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    open fun preparsedDocumentProvider(): PreparsedDocumentProvider {
+        return NoOpPreparsedDocumentProvider.INSTANCE
     }
 }
